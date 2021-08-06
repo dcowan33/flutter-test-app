@@ -31,6 +31,8 @@ class MarsScreen extends StatefulWidget {
 
 class _MarsScreenState extends State<MarsScreen> {
   late Future<DetailedPlanet> futureDetailedPlanet;
+  final ButtonStyle style = ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+  bool showDistanceToSun = false;
 
   @override
   void initState() {
@@ -38,6 +40,11 @@ class _MarsScreenState extends State<MarsScreen> {
     futureDetailedPlanet = fetchDetailedPlanet();
   }
 
+  void toggleDistance() {
+    setState(() {
+      showDistanceToSun = !showDistanceToSun;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +53,32 @@ class _MarsScreenState extends State<MarsScreen> {
         future: futureDetailedPlanet,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return Text('API data received - name: ${snapshot.data!.name}, radius: ${snapshot.data!.radius}');
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  snapshot.data!.name,
+                  style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)
+                ),
+                Image(
+                  image: NetworkImage(snapshot.data!.imagePath)
+                ),
+                ElevatedButton(
+                  style: style,
+                  onPressed: toggleDistance,
+                  child: const Text('Toggle'),
+                ),
+                Visibility(
+                  visible: showDistanceToSun,
+                  child: Text('Distance to Sun: ${snapshot.data!.distanceToSun} km'),
+                ),
+                Visibility(
+                  visible: !showDistanceToSun,
+                  child: Text('Distance to Earth: ${snapshot.data!.distanceToEarth} km')
+                )
+              ],
+            );
           }
           return const CircularProgressIndicator();
         },
